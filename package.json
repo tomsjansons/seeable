@@ -1,0 +1,27 @@
+{
+  "version": "0.0.44",
+  "scripts": {
+    "dev": "pnpm dev:debug",
+    "dev:info": "RUST_BACKTRACE=1 RUST_LOG=info cargo watch -c -w src -x run",
+    "dev:debug": "RUST_BACKTRACE=1 RUST_LOG=debug cargo watch -c -w src -x run",
+    "dev:trace": "RUST_BACKTRACE=1 RUST_LOG=trace cargo watch -c -w src -x run",
+    "db:reset": "cd migrator && cargo run",
+    "db:migrate:up": "sqlx migrate run",
+    "db:migrate:down": "sqlx migrate revert",
+    "css:watch": "tailwindcss -i src/input.css -o static/output.css --watch",
+    "css:build": "tailwindcss -i src/input.css -o static/output.css",
+    "sqlx:prepare": "cargo sqlx prepare",
+    "docker:build": "docker build -t seeable-server . --no-cache --progress plain",
+    "docker:compose:dev": "docker compose -f docker-compose-dev.yaml up -d",
+    "docker:compose:dev:remove": "docker compose -f docker-compose-dev.yaml down",
+    "cargo:install": "cargo install cargo-watch && cargo install cargo-cranky && cargo install sqlx-cli"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.6",
+    "prettier": "^3.0.3",
+    "prettier-plugin-jinja-template": "^1.1.0",
+    "prettier-plugin-tailwindcss": "^0.5.4",
+    "tailwindcss": "^3.3.3"
+  }
+}

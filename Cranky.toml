@@ -1,0 +1,12 @@
+deny = [
+  "clippy::all",
+]
+warn = [  
+  "clippy::pedantic",
+  "clippy::cargo"
+]
+allow = [
+  "clippy::module_name_repetitions",
+  "clippy::too_many_lines",
+  "clippy::enum_variant_names"
+]

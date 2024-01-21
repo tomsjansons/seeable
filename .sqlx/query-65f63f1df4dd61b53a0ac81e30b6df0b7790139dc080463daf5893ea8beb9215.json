@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into login_links (id, email, expires_at) values ($1, $2, now() + interval '600 seconds')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "65f63f1df4dd61b53a0ac81e30b6df0b7790139dc080463daf5893ea8beb9215"
+}

@@ -1,0 +1,36 @@
+[package]
+name = "seeable-server"
+version = "0.1.0"
+edition = "2021"
+resolver = "2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.7.3", features = ["macros"] }
+tokio = { version = "1.35.1", features = ["full"] }
+serde = { version = "1.0.194", features = ["derive"] }
+serde_json = { version = "1.0.109", features = ["raw_value"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter", "json"] }
+tower-http = { version ="0.5.0", features = ["trace", "compression-gzip", "cors", "request-id", "fs"]}
+tower = { version = "0.4.13", features = ["buffer"] }
+nanoid = "0.4.0"
+axum-macros = "0.4.0"
+axum-extra = { version = "0.9.1", features = ["cookie","cookie-signed"] }
+headers = { version = "0.4.0", features = ["nightly"] }
+http = "1.0.0"
+askama = "0.12.1"
+oauth2 = "4.4.2"
+snafu = { version = "0.8.0", features = ["backtrace"] }
+fang = { version = "0.10.4" , features = ["asynk", "derive-error" ], default-features = false }
+axum-htmx = "0.5.0"
+cookie = { version = "0.18.0", features = ["key-expansion"] }
+tower-request-id = "0.3.0"
+sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio", "tls-rustls"] }
+dotenvy = "0.15.7"
+sqlxmq = { version = "0.5.0", features = ["runtime-tokio-rustls"], default-features = false }
+reqwest = { version = "0.11.23", default-features = false, features = ["rustls-tls"] }
+
+[dev-dependencies]
+criterion = { version = "0.3", features = ["async_tokio"] }

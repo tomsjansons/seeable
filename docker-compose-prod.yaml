@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  seeable-db:
+    image: postgres:latest
+    volumes:
+      - seeable-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DATABASE_DB}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_USER: ${DATABASE_USER}
+    restart: always 
+    networks:
+        - seeable-network
+
+  seeable-dw:
+    image: postgres:latest
+    volumes:
+      - seeable-data-warehouse:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DATA_WAREHOUSE_DB}
+      POSTGRES_PASSWORD: ${DATA_WAREHOUSE_PASSWORD}
+      POSTGRES_USER: ${DATA_WAREHOUSE_USER}
+    restart: always
+    networks:
+      - seeable-network
+      - seeable-airbyte-network
+
+  seeable-server:
+    image: ${SEEABLE_SERVER_IMAGE_NAME}
+    environment:
+      - SEEABLE_ENV=${SEEABLE_ENV}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_DB=${DATABASE_DB}
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - AIRBYTE_URL_BASE=${AIRBYTE_URL_BASE}
+      - AIRBYTE_USER=${AIRBYTE_USER}
+      - AIRBYTE_PASSWORD=${AIRBYTE_PASSWORD}
+      - DATA_WAREHOUSE_HOST=${DATA_WAREHOUSE_HOST}
+      - DATA_WAREHOUSE_PORT=${DATA_WAREHOUSE_PORT}
+      - DATA_WAREHOUSE_USER=${DATA_WAREHOUSE_USER}
+      - DATA_WAREHOUSE_PASSWORD=${DATA_WAREHOUSE_PASSWORD}
+      - DATA_WAREHOUSE_DB=${DATA_WAREHOUSE_DB}
+    ports:
+      - 4000:4000
+    restart: always
+    networks:
+      - seeable-network
+      - seeable-airbyte-network
+
+volumes:
+  seeable-data:
+  seeable-data-warehouse:
+
+networks:
+  seeable-network:
+  seeable-airbyte-network:
+    name: airbyte_airbyte_public
+    external: true

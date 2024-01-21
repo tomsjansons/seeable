@@ -1,0 +1,15 @@
+<html>
+
+<head>
+	<script src="/static/htmx.1.9.6.js"></script>
+	<script defer src="/static/alpinejs.3.13.0.js"></script>
+	<link href="/static/output.css" rel="stylesheet" />
+	<link rel="icon" type="image/png" href="/static/eye-1.ico" />
+	<title>{{ html_title }}</title>
+</head>
+
+<body class="bg-orange-800" hx-boost="true">
+	{{ html_body_content|safe }}
+</body>
+
+</html>

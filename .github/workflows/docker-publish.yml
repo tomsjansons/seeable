@@ -1,0 +1,145 @@
+name: Publish Docker Image
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+
+jobs:
+
+  version-update:
+    name: Bump Version on main
+    runs-on: ubuntu-latest
+    outputs: 
+      new_tag: ${{ steps.version-bump.outputs.newTag }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+      - name: Automated Version Bump
+        id: version-bump
+        uses: phips28/gh-action-bump-version@v10.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          minor-wording: 'feat'
+          major-wording: 'feat!'
+          patch-wording: 'fix'     # Providing patch-wording will override commits
+          rc-wording: 'alpha'
+
+  build-and-push-docker:
+    runs-on: ubuntu-latest
+    needs: version-update
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/private.key
+          chmod 600 ~/.ssh/private.key
+          cat >>~/.ssh/config <<END
+          Host depl_env
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/private.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update Cargo.toml
+        uses: ciiiii/toml-editor@1.0.0
+        with:
+          file: "Cargo.toml"
+          key: "package.version"
+          value: ${{ needs.version-update.outputs.new_tag }}
+
+      # Set up BuildKit Docker container builder to be able to build
+      # multi-platform images and export cache
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build Docker image
+        id: build-and-push
+        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        with:
+          context: .
+          outputs: type=docker,dest=/tmp/image.tar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Server - Load Image
+        id: server-load-image
+        run: ssh -C depl_env docker load < /tmp/image.tar
+
+      - name: Server - Tag Image
+        id: server-tag-image
+        env:
+          IMAGE_ID: ${{ steps.build-and-push.outputs.imageid }}
+          IMAGE_NAME_AND_TAG: ${{ env.IMAGE_NAME }}:${{ needs.version-update.outputs.new_tag }}
+        run: ssh depl_env docker image tag "$IMAGE_ID" "$IMAGE_NAME_AND_TAG"
+
+      - name: Server - Copy Docker Compose
+        id: server-docker-compose
+        if: always()
+        run: ssh -C depl_env -T "cat > /tmp/docker-compose-prod.yaml" < ./docker-compose-prod.yaml
+
+      - name: Server - Copy ENV file
+        id: server-env-file
+        if: always()
+        run: echo '${{ secrets.PROD_ENV_FILE_CONTENTS }}' | ssh depl_env -T "cat > /tmp/.env"
+
+      - name: Server - Set Image Name
+        id: server-image-name
+        if: always()
+        run: echo 'SEEABLE_SERVER_IMAGE_NAME="${{ env.IMAGE_NAME }}:${{ needs.version-update.outputs.new_tag }}"' | ssh depl_env -T "cat >> /tmp/.env"
+
+      - name: Server - Stop Container
+        id: server-stop-container
+        if: always()
+        run: ssh depl_env docker stop prod-seeable-server-1
+
+      - name: Server - Remove Container
+        id: server-remove-container
+        if: always()
+        run: ssh depl_env docker rm prod-seeable-server-1
+
+      - name: Server - Run Docker Compose
+        id: server-run-docker-compose
+        if: always()
+        run: ssh depl_env docker compose -p prod -f /tmp/docker-compose-prod.yaml up -d
+
+      - name: Cleanup Docker Images
+        if: always()
+        run: ssh depl_env "docker images tomsjansons/seeable -q | tail -n +6 | xargs -I ARG docker rmi ARG"
+
+      - name: Cleanup SSH
+        if: always()
+        run: rm -rf ~/.ssh/
+
+
+
