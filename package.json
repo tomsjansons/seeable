@@ -5,7 +5,7 @@
     "dev:info": "RUST_BACKTRACE=1 RUST_LOG=info cargo watch -c -w src -x run",
     "dev:debug": "RUST_BACKTRACE=1 RUST_LOG=debug cargo watch -c -w src -x run",
     "dev:trace": "RUST_BACKTRACE=1 RUST_LOG=trace cargo watch -c -w src -x run",
-    "db:reset": "cd migrator && cargo run",
+    "db:migrate:add":"sqlx migrate add -r",
     "db:migrate:up": "sqlx migrate run",
     "db:migrate:down": "sqlx migrate revert",
     "css:watch": "tailwindcss -i src/input.css -o static/output.css --watch",

@@ -1,17 +1,41 @@
 version: "3.8"
 
 services:
-  postgres:
+  seeable-db:
     image: postgres:latest
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - seeable-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: seeable
-      POSTGRES_PASSWORD: seeable
-      POSTGRES_USER: seeable
+      POSTGRES_DB: ${DATABASE_DB}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_USER: ${DATABASE_USER}
+    restart: always 
     ports:
       - 54321:5432
-    restart: on-failure:3
+    networks:
+        - seeable-network
+
+  seeable-dw:
+    image: postgres:latest
+    volumes:
+      - seeable-data-warehouse:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DATA_WAREHOUSE_DB}
+      POSTGRES_PASSWORD: ${DATA_WAREHOUSE_PASSWORD}
+      POSTGRES_USER: ${DATA_WAREHOUSE_USER}
+    restart: always
+    ports:
+      - 54322:5432
+    networks:
+      - seeable-network
+      - seeable-airbyte-network
 
 volumes:
-  postgres-data:
+  seeable-data:
+  seeable-data-warehouse:
+
+networks:
+  seeable-network:
+  seeable-airbyte-network:
+    name: airbyte_airbyte_public
+    external: true

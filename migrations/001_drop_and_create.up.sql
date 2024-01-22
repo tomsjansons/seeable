@@ -1,12 +1,7 @@
--- SQLite syntax
-
-drop table if exists sessions;
-drop table if exists login_links;
-drop table if exists users;
-
 create table users (
     id varchar(21) primary key not null,
-    email varchar(255) unique not null
+    email varchar(255) unique not null,
+    name text not null
 );
 
 create table login_links (
