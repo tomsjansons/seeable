@@ -1,5 +1,5 @@
 {
-  "version": "0.0.46",
+  "version": "0.1.0",
   "scripts": {
     "dev": "pnpm dev:debug",
     "dev:info": "RUST_BACKTRACE=1 RUST_LOG=info cargo watch -c -w src -x run",
