@@ -8,7 +8,6 @@ use crate::{
     common::{app_state::AppState, env_state::EnvState},
     ui::routes,
 };
-use ::reqwest::Client;
 use axum::{
     body::Body,
     extract::Request,
@@ -16,7 +15,6 @@ use axum::{
     Router,
 };
 use common::env_config::{self, Env};
-use sqlx::postgres::PgPoolOptions;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tower_request_id::{RequestId, RequestIdLayer};
 
@@ -25,8 +23,8 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[tokio::main]
 async fn main() {
     let env_config = env_config::EnvConfig::new();
-    EnvState::init(&env_config).await;
-    let app_state = AppState::new(&env_config);
+    EnvState::init(env_config).await;
+    let app_state = AppState::new(&EnvState::get().env_config);
 
     tracing_subscriber::fmt::init();
 
@@ -41,14 +39,12 @@ async fn main() {
         println!("Name: {}", path.unwrap().path().display())
     }
 
-    if env_config.env != Env::Local {
+    if EnvState::get().env_config.env != Env::Local {
         sqlx::migrate!()
             .run(&EnvState::get().db_writer_pool)
             .await
             .expect("migrations failed");
     }
-
-    let airbyte = env_config.airbyte.clone();
 
     let app = Router::new()
         .nest_service("/static", ServeDir::new("static"))
@@ -59,40 +55,9 @@ async fn main() {
         .route("/login/link/:link_id", get(routes::login::link::handler))
         .route("/logout", get(routes::logout::handler))
         .route("/app", get(routes::app::handler))
-        .route("/app", post(routes::app::handler_post))
         .route("/test", get(routes::test::handler))
         .route("/user/:id", get(get_user))
-        .route(
-            "/test/dw",
-            get(|| async move {
-                let db = PgPoolOptions::new()
-                    .max_connections(5)
-                    .connect(env_config.data_warehouse.get_url_admin().as_str())
-                    .await
-                    .expect("Unable to connect to writer database");
-
-                sqlx::query("select 1;")
-                    .execute(&db)
-                    .await
-                    .expect("query failed");
-                "ok"
-            }),
-        )
         .route("/_sys/version", get(|| async { VERSION }))
-        .route(
-            "/test/airbyte",
-            get(|| async move {
-                let cl = Client::new();
-                cl.get(airbyte.url_base)
-                    .basic_auth(airbyte.user, Some(airbyte.password))
-                    .send()
-                    .await
-                    .expect("could not make request")
-                    .text()
-                    .await
-                    .expect("could not get response text")
-            }),
-        )
         .layer(
             // Let's create a tracing span for each request
             TraceLayer::new_for_http().make_span_with(|request: &Request<Body>| {

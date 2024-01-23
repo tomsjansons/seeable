@@ -39,12 +39,12 @@ pub async fn handler_post(jar: SignedCookieJar, Form(login): Form<LoginFormData>
     }
     let session_id = nanoid!();
     let result = sqlx::query!(
-        "insert into login_links (id, email, expires_at) values ($1, $2, now() + interval '600 seconds')",
+        "INSERT INTO login_links (id, email, expires_at) VALUES ($1, $2, now() + interval '600 seconds')",
         session_id.clone(),
         login.email.clone(),
     ).execute(&EnvState::get().db_writer_pool).await;
     tracing::info!(msg = "login link created", email = ?login.email, session_id = ?session_id.clone());
-    println!("http://localhost:3000/login/link/{}", session_id);
+    println!("http://localhost:4000/login/link/{}", session_id);
     match result {
         Ok(_) => Redirect::to("/login/sent").into_response(),
         Err(e) => Redirect::to(format!("/login/sent?error=\"{:?}\"", e).as_str()).into_response(),

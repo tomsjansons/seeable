@@ -1,4 +1,4 @@
-name: Publish Docker Image
+name: Deploy new version to PROD 
 
 on:
   push:

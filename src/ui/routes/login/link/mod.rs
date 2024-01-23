@@ -27,8 +27,8 @@ pub async fn handler(Path(link_id): Path<String>, jar: SignedCookieJar) -> Respo
 
     let login_link_result = sqlx::query_as!(
         LoginLink,
-        "select email from login_links where id = $1 and expires_at > now()",
-        link_id,
+        "SELECT email FROM login_links WHERE id = $1 AND expires_at > now()",
+        link_id.clone(),
     )
     .fetch_one(&EnvState::get().db_reader_pool)
     .await;
@@ -54,6 +54,10 @@ pub async fn handler(Path(link_id): Path<String>, jar: SignedCookieJar) -> Respo
         }
         Ok(r) => r,
     };
+
+    let _ = sqlx::query!("DELETE FROM login_links WHERE id = $1", link_id)
+        .execute(&EnvState::get().db_writer_pool)
+        .await;
 
     auth.create_session(
         &user.id,

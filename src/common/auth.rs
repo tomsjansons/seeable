@@ -33,9 +33,9 @@ impl Auth {
                 let session_id = session_cookie.value();
                 let user_result = sqlx::query_as!(
                     User,
-                    "select users.id, sessions.id as session_id from sessions \
-                    join users on users.id = sessions.user_id \
-                    where sessions.id = $1 and sessions.expires_at > now()",
+                    "SELECT users.id, sessions.id as session_id FROM sessions \
+                    JOIN users ON users.id = sessions.user_id \
+                    WHERE sessions.id = $1 AND sessions.expires_at > now()",
                     session_id,
                 )
                 .fetch_optional(&EnvState::get().db_reader_pool)
@@ -81,7 +81,7 @@ impl Auth {
         match self.identity {
             Identity::User(user) => {
                 let delete_result =
-                    sqlx::query!("delete from sessions where id = $1", user.session_id)
+                    sqlx::query!("DELETE FROM sessions WHERE id = $1", user.session_id)
                         .execute(&EnvState::get().db_writer_pool)
                         .await;
                 match delete_result {

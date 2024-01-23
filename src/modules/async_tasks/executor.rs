@@ -2,7 +2,7 @@ use snafu::prelude::*;
 use sqlx::Error;
 use sqlxmq::{JobRegistry, JobRunnerHandle};
 
-use super::tasks::example_job;
+use super::tasks::dataspace_init;
 
 #[derive(Debug, Snafu)]
 pub enum AsyncTaskExecutorError {
@@ -11,7 +11,7 @@ pub enum AsyncTaskExecutorError {
 }
 
 pub async fn start(pool: &sqlx::PgPool) -> Result<JobRunnerHandle, AsyncTaskExecutorError> {
-    let registry = JobRegistry::new(&[example_job]);
+    let registry = JobRegistry::new(&[dataspace_init]);
 
     let runner = registry
         .runner(pool)

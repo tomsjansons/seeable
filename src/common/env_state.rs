@@ -8,10 +8,11 @@ static ENV_STATE: OnceCell<EnvState> = OnceCell::const_new();
 pub struct EnvState {
     pub db_writer_pool: PgPool,
     pub db_reader_pool: PgPool,
+    pub env_config: EnvConfig,
 }
 
 impl EnvState {
-    pub async fn init(env_config: &EnvConfig) -> () {
+    pub async fn init(env_config: EnvConfig) -> () {
         let db_writer_pool = PgPoolOptions::new()
             .max_connections(5)
             .connect(env_config.database_writer.get_url().as_str())
@@ -26,6 +27,7 @@ impl EnvState {
         let state = EnvState {
             db_writer_pool,
             db_reader_pool,
+            env_config,
         };
 
         if !ENV_STATE.initialized() {

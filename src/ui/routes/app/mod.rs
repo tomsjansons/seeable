@@ -2,13 +2,8 @@ use askama::Template;
 use axum::response::Response;
 use axum_extra::extract::SignedCookieJar;
 use axum_htmx::HxBoosted;
-use snafu::{ResultExt, Snafu};
 
-use crate::{
-    common::{auth::Auth, env_state::EnvState},
-    modules::async_tasks::tasks::example_job,
-    ui::html::Html,
-};
+use crate::{common::auth::Auth, ui::html::Html};
 
 #[derive(Template)]
 #[template(path = "routes/app/mod.html")]
@@ -22,29 +17,26 @@ pub async fn handler(HxBoosted(boosted): HxBoosted, jar: SignedCookieJar) -> Res
     Html::render_with_content("this is root title", App {}, boosted)
 }
 
-#[derive(Debug, Snafu)]
-pub enum TestErr {
-    #[snafu(display("Error creating job runner: {}", source))]
-    JobRunnerError { source: serde_json::Error },
+// #[derive(Debug, Snafu)]
+// pub enum TestErr {
+//     #[snafu(display("Error creating job runner: {}", source))]
+//     JobRunnerError { source: serde_json::Error },
+//
+//     #[snafu(display("Error creating job runner: {}", source))]
+//     JobRunnerAlsoError { source: sqlx::Error },
+// }
 
-    #[snafu(display("Error creating job runner: {}", source))]
-    JobRunnerAlsoError { source: sqlx::Error },
-}
-
-async fn trigger_test_job() -> Result<(), TestErr> {
-    example_job
-        .builder()
-        // This is where we can override job configuration
-        .set_json("John")
-        .context(JobRunnerSnafu)?
-        .spawn(&EnvState::get().db_writer_pool)
-        .await
-        .context(JobRunnerAlsoSnafu)?;
-    Ok(())
-}
-
-pub async fn handler_post(HxBoosted(boosted): HxBoosted) -> Response {
-    let _ = trigger_test_job().await;
-
-    Html::render_with_content("this is root title", App {}, boosted)
-}
+// async fn trigger_dataspace_init_job<'a>(
+//     dataspace_id: String,
+//     executor: &dyn sqlx::Executor<'a>,
+// ) -> Result<(), TestErr> {
+//     let args = DataspaceInitArgs { database_id };
+//     dataspace_init
+//         .builder()
+//         .set_json(&args)
+//         .context(JobRunnerSnafu)?
+//         .spawn(executor)
+//         .await
+//         .context(JobRunnerAlsoSnafu)?;
+//     Ok(())
+// }

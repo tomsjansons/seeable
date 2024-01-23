@@ -14,27 +14,27 @@ pub struct DataWarehouseConfig {
 
 #[derive(Clone)]
 pub struct DataWarehouseCreds {
-    pub user: String,
+    pub username: String,
     pub password: String,
     pub database: String,
 }
 
 impl DataWarehouseCreds {
-    pub fn new(user: String, password: String, database: String) -> DataWarehouseCreds {
+    pub fn new(username: String, password: String, database: String) -> DataWarehouseCreds {
         DataWarehouseCreds {
-            user,
+            username,
             password,
             database,
         }
     }
 
     pub fn construct_from_env() -> DataWarehouseCreds {
-        let user = std::env::var("DATA_WAREHOUSE_USER").expect("DATA_WAREHOUSE_USER missing");
+        let username = std::env::var("DATA_WAREHOUSE_USER").expect("DATA_WAREHOUSE_USER missing");
         let password =
             std::env::var("DATA_WAREHOUSE_PASSWORD").expect("DATA_WAREHOUSE_PASSWORD missing");
         let database = std::env::var("DATA_WAREHOUSE_DB").expect("DATA_WAREHOUSE_DB missing");
         DataWarehouseCreds {
-            user,
+            username,
             password,
             database,
         }
@@ -55,18 +55,11 @@ impl DataWarehouseConfig {
     pub fn get_url_admin(&self) -> String {
         format!(
             "postgres://{}:{}@{}:{}/{}",
-            self.admin_creds.user,
+            self.admin_creds.username,
             self.admin_creds.password,
             self.host,
             self.port,
             self.admin_creds.database
-        )
-    }
-
-    pub fn get_url_creds(&self, creds: DataWarehouseCreds) -> String {
-        format!(
-            "postgres://{}:{}@{}:{}/{}",
-            creds.user, creds.password, self.host, self.port, creds.database
         )
     }
 }
