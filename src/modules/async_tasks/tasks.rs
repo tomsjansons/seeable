@@ -19,6 +19,7 @@ pub struct DataspaceInitArgs {
 pub async fn dataspace_init(
     mut current_job: CurrentJob,
 ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+    tracing::debug!("======= started job");
     let maybe_args: Option<DataspaceInitArgs> = current_job.json()?;
 
     let args = match maybe_args {

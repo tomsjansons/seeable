@@ -123,7 +123,7 @@ impl Initer {
         .context(DbSnafu)?;
 
         if maybe_db.is_none() {
-            let _ = sqlx::query!("CREATE DATABASE \"{database}\";")
+            let _ = sqlx::query(format!("CREATE DATABASE \"{database}\";").as_str())
                 .execute(&dw_con)
                 .await
                 .context(DbSnafu);

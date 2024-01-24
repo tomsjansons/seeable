@@ -10,15 +10,21 @@ pub enum AsyncTaskExecutorError {
     JobRunnerError { source: Error },
 }
 
-pub async fn start(pool: &sqlx::PgPool) -> Result<JobRunnerHandle, AsyncTaskExecutorError> {
-    let registry = JobRegistry::new(&[dataspace_init]);
+pub struct AsyncTaskExecutor {
+    _runner: JobRunnerHandle,
+}
 
-    let runner = registry
-        .runner(pool)
-        .set_concurrency(10, 20)
-        .run()
-        .await
-        .context(JobRunnerSnafu)?;
+impl AsyncTaskExecutor {
+    pub async fn start(pool: &sqlx::PgPool) -> Result<Self, AsyncTaskExecutorError> {
+        let registry = JobRegistry::new(&[dataspace_init]);
 
-    Ok(runner)
+        let runner = registry
+            .runner(pool)
+            .set_concurrency(10, 20)
+            .run()
+            .await
+            .context(JobRunnerSnafu)?;
+
+        Ok(Self { _runner: runner })
+    }
 }

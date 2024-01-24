@@ -82,9 +82,10 @@ async fn main() {
         .with_state(app_state);
 
     tracing::info!("starting async processing");
-    let _ = async_tasks::executor::start(&EnvState::get().db_writer_pool)
-        .await
-        .expect("async processing failed");
+    let _executor =
+        async_tasks::executor::AsyncTaskExecutor::start(&EnvState::get().db_writer_pool)
+            .await
+            .expect("async processing failed");
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000")
         .await

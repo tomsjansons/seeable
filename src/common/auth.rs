@@ -104,7 +104,7 @@ impl Auth {
     pub async fn create_session(self, user_id: &str, error_response: Response) -> Response {
         let session_id = nanoid!();
         let insert_result = sqlx::query!(
-            "insert into sessions (id, user_id, expires_at) values ($1, $2, now() + interval '1 day')",
+            "INSERT INTO sessions (id, user_id, expires_at) VALUES ($1, $2, now() + interval '1 day')",
             session_id,
             user_id,
         ).execute(&EnvState::get().db_writer_pool).await;
