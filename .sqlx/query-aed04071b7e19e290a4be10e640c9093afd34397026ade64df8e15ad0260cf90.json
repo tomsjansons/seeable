@@ -1,22 +1,23 @@
 {
   "db_name": "PostgreSQL",
-  "query": "select email from login_links where id = $1 and expires_at > now()",
+  "query": "INSERT INTO users (id, email, name) VALUES ($1, $2, '') returning id",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "email",
+        "name": "id",
         "type_info": "Varchar"
       }
     ],
     "parameters": {
       "Left": [
-        "Text"
+        "Varchar",
+        "Varchar"
       ]
     },
     "nullable": [
       false
     ]
   },
-  "hash": "81780daec8125ca456d8c1a868b85465d9c68c7f9741b9d4248d7c88a7422e28"
+  "hash": "aed04071b7e19e290a4be10e640c9093afd34397026ade64df8e15ad0260cf90"
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "delete from sessions where id = $1",
+  "query": "DELETE FROM login_links WHERE id = $1",
   "describe": {
     "columns": [],
     "parameters": {
@@ -10,5 +10,5 @@
     },
     "nullable": []
   },
-  "hash": "3c9893d4ce373ee15ffe251833ab8f782c0d7bab667971a434d1b8871ea47d6b"
+  "hash": "c89855b6a327279f0dc47883bd9d6942916519ee18262a11a577c8ec2457f0a9"
 }

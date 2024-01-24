@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "insert into users (id, email) values ($1, $2) on conflict do nothing",
+  "query": "INSERT INTO dataspace_members (user_id, dataspace_id) VALUES ($1, $2)",
   "describe": {
     "columns": [],
     "parameters": {
@@ -11,5 +11,5 @@
     },
     "nullable": []
   },
-  "hash": "89518433cf24edd217aeee91f060febeeec6d53869f8e0a7f808991f4b92cacd"
+  "hash": "39678da57b1d5640bdbf441bf56488a638a54eae80322a970de61e77af534d31"
 }

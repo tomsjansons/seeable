@@ -1,11 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "select id from users where email = $1",
+  "query": "SELECT email FROM login_links WHERE id = $1 AND expires_at > now()",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "id",
+        "name": "email",
         "type_info": "Varchar"
       }
     ],
@@ -18,5 +18,5 @@
       false
     ]
   },
-  "hash": "ba3452c8eb32bc14739ee17e1ed1c69a34bbd25a5c58bf6b90df09f232f5a0f8"
+  "hash": "4941ac992af489daac9c7372fb1271b7f993cf988b32549b23e03f8574c8ecef"
 }

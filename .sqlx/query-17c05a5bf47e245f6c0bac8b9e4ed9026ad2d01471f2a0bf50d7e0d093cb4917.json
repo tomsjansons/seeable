@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "select users.id, sessions.id as session_id from sessions join users on users.id = sessions.user_id where sessions.id = $1 and sessions.expires_at > now()",
+  "query": "SELECT users.id, sessions.id as session_id FROM sessions JOIN users ON users.id = sessions.user_id WHERE sessions.id = $1 AND sessions.expires_at > now()",
   "describe": {
     "columns": [
       {
@@ -24,5 +24,5 @@
       false
     ]
   },
-  "hash": "60c68f5f27fd88fea5f6651a5491741c261aef57eed9ea9c8de1fda08152d39f"
+  "hash": "17c05a5bf47e245f6c0bac8b9e4ed9026ad2d01471f2a0bf50d7e0d093cb4917"
 }
